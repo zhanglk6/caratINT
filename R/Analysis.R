@@ -61,7 +61,7 @@ stratify <- function(...) {
 #'error0 = 0.5*exp(0.5*X_star)*rnorm(N)
 #'S <- stratify(X_d, W_d)
 #'X <- X_d
-#'A <- sample(c(0,1),n,replace=TRUE,prob=c(1-pi,pi))
+#'A <- sample(c(0,1),N,replace=TRUE,prob=c(1-pi,pi))
 #'alphavec <- c(5, 4, 0.5, 1.2, 2, 6)
 #'Y0 <- alphavec[2] +  exp(alphavec[3]*X_star) + alphavec[5]*W + error0
 #'Y1 <- alphavec[1] + exp((alphavec[3] + alphavec[4])*X_star) + alphavec[5]*W+ alphavec[6] * W *X_star + error1
@@ -121,7 +121,7 @@ usual.test <- function(Y, A, S, X, pi, q) {
 #'error0 = 0.5*exp(0.5*X_star)*rnorm(N)
 #'S <- stratify(X_d, W_d)
 #'X <- X_d
-#'A <- sample(c(0,1),n,replace=TRUE,prob=c(1-pi,pi))
+#'A <- sample(c(0,1),N,replace=TRUE,prob=c(1-pi,pi))
 #'alphavec <- c(5, 4, 0.5, 1.2, 2, 6)
 #'Y0 <- alphavec[2] +  exp(alphavec[3]*X_star) + alphavec[5]*W + error0
 #'Y1 <- alphavec[1] + exp((alphavec[3] + alphavec[4])*X_star) + alphavec[5]*W+ alphavec[6] * W *X_star + error1
@@ -180,7 +180,7 @@ modified.test <- function(Y, A, S, X, pi, q) {
 #'error0 = 0.5*exp(0.5*X_star)*rnorm(N)
 #'S <- stratify(X_d, W_d)
 #'X <- X_d
-#'A <- sample(c(0,1),n,replace=TRUE,prob=c(1-pi,pi))
+#'A <- sample(c(0,1),N,replace=TRUE,prob=c(1-pi,pi))
 #'alphavec <- c(5, 4, 0.5, 1.2, 2, 6)
 #'Y0 <- alphavec[2] +  exp(alphavec[3]*X_star) + alphavec[5]*W + error0
 #'Y1 <- alphavec[1] + exp((alphavec[3] + alphavec[4])*X_star) + alphavec[5]*W+ alphavec[6] * W *X_star + error1
