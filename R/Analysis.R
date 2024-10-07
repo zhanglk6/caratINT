@@ -4,7 +4,7 @@ stratify <- function(...) {
 
 usual.test <- function(Y, A, S, X, pi, q) {
   A = cat.to.int(A)
-  S = cat.to.int(S)
+  S = cat.to.int(S) + 1
   X = cat.to.int(X)
 
   if (max(X) == 1) {
@@ -16,7 +16,7 @@ usual.test <- function(Y, A, S, X, pi, q) {
 
 modified.test <- function(Y, A, S, X, pi, q) {
   A = cat.to.int(A)
-  S = cat.to.int(S)
+  S = cat.to.int(S) + 1
   X = cat.to.int(X)
 
   if (max(X) == 1) {
@@ -28,7 +28,7 @@ modified.test <- function(Y, A, S, X, pi, q) {
 
 stratified.adjusted.test <- function(Y, A, S, X, pi, q) {
   A = cat.to.int(A)
-  S = cat.to.int(S)
+  S = cat.to.int(S) + 1
   X = cat.to.int(X)
 
   if (max(X) == 1) {
