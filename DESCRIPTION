@@ -1,12 +1,11 @@
 Package: caratINT
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Interaction Tests with Covariate-Adaptive Randomization
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Author: Likun Zhang [aut, cre], Wei Ma [aut, ths]
+Maintainer: Likun Zhang <zhanglk6@ruc.edu.cn>
+Description: This package implements all of the interaction tests in Zhang and Ma (2024) for interaction testing under covariate-adaptive randomization
+License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.3.2
