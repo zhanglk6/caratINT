@@ -5,10 +5,10 @@
 #'Testing the interaction effect based on difference in means. It
 #'implements the methods as described in Sections 3.1 and 4.1, Zhang and Ma (2024).
 #'
-#'@return All combinations of covariates' levels
+#'@return All level combinations derived from the provided categorical covariates.
 #'
 #'@examples
-#'#The code shows how to generate strata based on one or more categorical variables
+#'#The code shows how to generate strata based on one or more categorical covariates
 #'N <- 800
 #'X_star = runif(N, -1, 1)
 #'X_d = ifelse(X_star > 0, 1, 0)
@@ -38,21 +38,16 @@ stratify <- function(...) {
 #'@param X a categorical vector of covariate levels, whose
 #'  treatment-covariate interaction is of interest.
 #'@param pi a numeric value for the target treatment proportion in each stratum.
-#'@param q a numeric value indicating the balance level of covariate-adaptive
-#'  randomizations. Detailed information can be found in Section 2, Ma et
-#'  al.(2020) and Zhang and Ma (2024).
 #'
 #'@return The p-value for the test.
 #'
-#'@references Zhang, L. & Ma, W. (2024). \emph{Interaction tests with
-#'  covariate-adaptive randomization}.
-#'  arXiv preprint arXiv:2311.17445.
+#'@references Zhang, L. & Ma, W. (2024). Interaction tests with
+#'  covariate-adaptive randomization. arXiv preprint arXiv:2311.17445.
 #'
 #'@examples
 #'#The code replicates the simulation setting of Model 2 in Section 5, Zhang and Ma (2024).
 #'N <- 800
 #'pi <- 0.5
-#'q <- pi*(1-pi)
 #'X_star = runif(N, -1, 1)
 #'X_d = ifelse(X_star > 0, 1, 0)
 #'W = rnorm(N,0,2)
@@ -66,17 +61,17 @@ stratify <- function(...) {
 #'Y0 <- alphavec[2] +  exp(alphavec[3]*X_star) + alphavec[5]*W + error0
 #'Y1 <- alphavec[1] + exp((alphavec[3] + alphavec[4])*X_star) + alphavec[5]*W+ alphavec[6] * W *X_star + error1
 #'Y <- Y0*(1-A)+Y1*A
-#'usual.test(Y, A, S, X, pi, q)
+#'usual.test(Y, A, S, X, pi)
 #'@export
-usual.test <- function(Y, A, S, X, pi, q) {
+usual.test <- function(Y, A, S, X, pi) {
   A = cat.to.int(A)
   S = cat.to.int(S) + 1
   X = cat.to.int(X)
 
   if (max(X) == 1) {
-    return(old.test(Y, A, S, X, pi, q))
+    return(old.test(Y, A, S, X, pi, pi*(1-pi)))
   } else {
-      return(old.test.multi(Y, A, S, X, pi, q))
+      return(old.test.multi(Y, A, S, X, pi, pi*(1-pi)))
     }
 }
 
@@ -100,13 +95,17 @@ usual.test <- function(Y, A, S, X, pi, q) {
 #'@param pi a numeric value for the target treatment proportion in each stratum.
 #'@param q a numeric value indicating the balance level of covariate-adaptive
 #'  randomizations. Detailed information can be found in Section 2, Ma et
-#'  al.(2020) and Zhang and Ma (2024).
+#'  al. (2022) and Zhang and Ma (2024).
 #'
 #'@return The p-value for the test.
 #'
-#'@references Zhang, L. & Ma, W. (2024). \emph{Interaction tests with
-#'  covariate-adaptive randomization}.
-#'  arXiv preprint arXiv:2311.17445.
+#'@references Ma, W., Tu, F., & Liu, H. (2022). Regression analysis for
+#'  covariate‐adaptive randomization: a robust and efficient inference
+#'  perspective. \emph{Statistics in Medicine}, 41(29), 5645--5661.
+#'
+#'@references Zhang, L. & Ma, W. (2024). Interaction tests with
+#'  covariate-adaptive randomization. arXiv preprint arXiv:2311.17445.
+#'
 #'
 #'@examples
 #'#The code replicates the simulation setting of Model 2 in Section 5, Zhang and Ma (2024).
@@ -157,21 +156,16 @@ modified.test <- function(Y, A, S, X, pi, q) {
 #'@param X a categorical vector of covariate levels, whose
 #'  treatment-covariate interaction is of interest.
 #'@param pi a numeric value for the target treatment proportion in each stratum.
-#'@param q a numeric value indicating the balance level of covariate-adaptive
-#'  randomizations. Detailed information can be found in Section 2, Ma et
-#'  al.(2020) and Zhang and Ma (2024).
 #'
 #'@return The p-value for the test.
 #'
-#'@references Zhang, L. & Ma, W. (2024). \emph{Interaction tests with
-#'  covariate-adaptive randomization}.
-#'  arXiv preprint arXiv:2311.17445.
+#'@references Zhang, L. & Ma, W. (2024). Interaction tests with
+#'  covariate-adaptive randomization. arXiv preprint arXiv:2311.17445.
 #'
 #'@examples
 #'#The code replicates the simulation setting of Model 2 in Section 5, Zhang and Ma (2024).
 #'N <- 800
 #'pi <- 0.5
-#'q <- pi*(1-pi)
 #'X_star = runif(N, -1, 1)
 #'X_d = ifelse(X_star > 0, 1, 0)
 #'W = rnorm(N,0,2)
@@ -185,17 +179,17 @@ modified.test <- function(Y, A, S, X, pi, q) {
 #'Y0 <- alphavec[2] +  exp(alphavec[3]*X_star) + alphavec[5]*W + error0
 #'Y1 <- alphavec[1] + exp((alphavec[3] + alphavec[4])*X_star) + alphavec[5]*W+ alphavec[6] * W *X_star + error1
 #'Y <- Y0*(1-A)+Y1*A
-#'stratified.adjusted.test(Y, A, S, X, pi, q)
+#'stratified.adjusted.test(Y, A, S, X, pi)
 #'@export
-stratified.adjusted.test <- function(Y, A, S, X, pi, q) {
+stratified.adjusted.test <- function(Y, A, S, X, pi) {
   A = cat.to.int(A)
   S = cat.to.int(S) + 1
   X = cat.to.int(X)
 
   if (max(X) == 1) {
-    return(strata.test(Y, A, S, X, pi, q))
+    return(strata.test(Y, A, S, X, pi, 0))
   } else {
-    return(strata.test.multi(Y, A, S, X, pi, q))
+    return(strata.test.multi(Y, A, S, X, pi, 0))
   }
 }
 

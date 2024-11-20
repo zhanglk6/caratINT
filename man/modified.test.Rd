@@ -23,7 +23,7 @@ treatment-covariate interaction is of interest.}
 
 \item{q}{a numeric value indicating the balance level of covariate-adaptive
 randomizations. Detailed information can be found in Section 2, Ma et
-al.(2020) and Zhang and Ma (2024).}
+al. (2022) and Zhang and Ma (2024).}
 }
 \value{
 The p-value for the test.
@@ -57,7 +57,10 @@ Y <- Y0*(1-A)+Y1*A
 modified.test(Y, A, S, X, pi, q)
 }
 \references{
-Zhang, L. & Ma, W. (2024). \emph{Interaction tests with
- covariate-adaptive randomization}.
- arXiv preprint arXiv:2311.17445.
+Ma, W., Tu, F., & Liu, H. (2022). Regression analysis for
+ covariate‐adaptive randomization: a robust and efficient inference
+ perspective. \emph{Statistics in Medicine}, 41(29), 5645--5661.
+
+Zhang, L. & Ma, W. (2024). Interaction tests with
+ covariate-adaptive randomization. arXiv preprint arXiv:2311.17445.
 }

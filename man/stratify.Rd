@@ -7,7 +7,7 @@
 stratify(...)
 }
 \value{
-All combinations of covariates' levels
+All level combinations derived from the provided categorical covariates.
 }
 \description{
 Generate strata by considering all combinations of covariates' levels
@@ -17,7 +17,7 @@ Testing the interaction effect based on difference in means. It
 implements the methods as described in Sections 3.1 and 4.1, Zhang and Ma (2024).
 }
 \examples{
-#The code shows how to generate strata based on one or more categorical variables
+#The code shows how to generate strata based on one or more categorical covariates
 N <- 800
 X_star = runif(N, -1, 1)
 X_d = ifelse(X_star > 0, 1, 0)
