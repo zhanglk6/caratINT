@@ -192,5 +192,3 @@ stratified.adjusted.test <- function(Y, A, S, X, pi) {
     return(strata.test.multi(Y, A, S, X, pi, 0))
   }
 }
-
-
