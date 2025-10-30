@@ -39,7 +39,7 @@ stratify <- function(...) {
 #'  treatment-covariate interaction is of interest.
 #'@param pi a numeric value for the target treatment proportion in each stratum.
 #'
-#'@return The p-value for the test.
+#'@return The two-sieded p-value for the test.
 #'
 #'@references Zhang, L. & Ma, W. (2024). Interaction tests with
 #'  covariate-adaptive randomization. arXiv preprint arXiv:2311.17445.
@@ -97,7 +97,7 @@ usual.test <- function(Y, A, S, X, pi) {
 #'  randomizations. Detailed information can be found in Section 2, Ma et
 #'  al. (2022) and Zhang and Ma (2024).
 #'
-#'@return The p-value for the test.
+#'@return The two-sieded p-value for the test.
 #'
 #'@references Ma, W., Tu, F., & Liu, H. (2022). Regression analysis for
 #'  covariate‐adaptive randomization: a robust and efficient inference
@@ -157,7 +157,7 @@ modified.test <- function(Y, A, S, X, pi, q) {
 #'  treatment-covariate interaction is of interest.
 #'@param pi a numeric value for the target treatment proportion in each stratum.
 #'
-#'@return The p-value for the test.
+#'@return The two-sieded p-value for the test.
 #'
 #'@references Zhang, L. & Ma, W. (2024). Interaction tests with
 #'  covariate-adaptive randomization. arXiv preprint arXiv:2311.17445.

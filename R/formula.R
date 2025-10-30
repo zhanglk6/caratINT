@@ -1,3 +1,8 @@
+#'Transform categorical variables to Integers 0, 1, 2, ...
+#'
+#'@param categorical_var a categorical variable, e.g, covariate X and stratum S.
+#'
+#'@return The integer froms of the variable.
 cat.to.int <- function(categorical_var) {
   # Ensure the input is a factor (if not already)
   categorical_var <- as.factor(categorical_var)
@@ -9,12 +14,32 @@ cat.to.int <- function(categorical_var) {
   return(encoded_var)
 }
 
+#'Generate contrast matrices for interaction tests 
+#'for no heterogeneity for over all levels of X.
+#'
+#'@param K equals the levels of categorical X minus 1, that is, K = max(cat.to.int(X)).
+#'
+#'@return The contrast matrix R.
 generate.R.matrix <- function(K) {
   ## contrast matrix R
   matrix(cbind(-rep(1,K), diag(K)), nrow = K)
 }
 
-
+#'Generate a batch of frequently used quantities to avoid redundancy.
+#'
+#'@param Y a numeric vector of observed outcomes. Its length should be the same
+#'  as the number of subjects.
+#'@param A a numeric vector of treatment assignments. Its length should be the
+#'  same as the number of subjects.
+#'@param S a categorical vector of stratum labels. Its length should be the same as
+#'  the number of subjects.
+#'@param X a categorical vector of covariate levels, whose
+#'  treatment-covariate interaction is of interest.
+#'@param pi a numeric value for the target treatment proportion in each stratum.
+#'@param q a numeric value indicating the balance level of covariate-adaptive
+#'  randomizations. not used here.
+#'
+#'@return some frequently used quantities
 base.est.multi <- function(Y, A, S, X, pi, q) {
   ## helper for multilevel calculation
   n = length(Y)
@@ -48,12 +73,42 @@ base.est.multi <- function(Y, A, S, X, pi, q) {
               varY0x = varY0x, px = px))
 }
 
+#' OLS test for no interaction for binary X 
+#'@param Y a numeric vector of observed outcomes. Its length should be the same
+#'  as the number of subjects.
+#'@param A a numeric vector of treatment assignments. Its length should be the
+#'  same as the number of subjects.
+#'@param S a categorical vector of stratum labels. Its length should be the same as
+#'  the number of subjects, not used here.
+#'@param X a categorical vector of covariate levels, whose
+#'  treatment-covariate interaction is of interest.
+#'@param pi a numeric value for the target treatment proportion in each stratum, not used here.
+#'@param q a numeric value indicating the balance level of covariate-adaptive
+#'  randomizations. not used here.
+#'
+#'@return The two-sieded p-value for the test. 
+#'  Can be either conservative or anti-conservariave
 ols.test <- function(Y, A, S, X, pi, q) {
   ## OLS test for no interaction
   lm.result = lm(Y~X + A + X:A)
   summary(lm.result)$coefficients[4,4]
 }
 
+#' Usual test using Huber White sandwitch variance estimator for no interaction for binary X 
+#'@param Y a numeric vector of observed outcomes. Its length should be the same
+#'  as the number of subjects.
+#'@param A a numeric vector of treatment assignments. Its length should be the
+#'  same as the number of subjects.
+#'@param S a categorical vector of stratum labels. Its length should be the same as
+#'  the number of subjects.
+#'@param X a categorical vector of covariate levels, whose
+#'  treatment-covariate interaction is of interest.
+#'@param pi a numeric value for the target treatment proportion in each stratum.
+#'@param q a numeric value indicating the balance level of covariate-adaptive
+#'  randomizations.
+#'
+#'@return The two-sieded p-value for the test. 
+#'  Can be conservative
 old.test <- function(Y, A, S, X, pi, q) {
   ## product term t-test using Huber White variance estimators
   n = length(Y)
@@ -64,6 +119,21 @@ old.test <- function(Y, A, S, X, pi, q) {
   return((2 * (1- pnorm(abs(t.value))) ))
 }
 
+#' Usual test using Huber White sandwitch variance estimator for no interaction for categorical X 
+#'@param Y a numeric vector of observed outcomes. Its length should be the same
+#'  as the number of subjects.
+#'@param A a numeric vector of treatment assignments. Its length should be the
+#'  same as the number of subjects.
+#'@param S a categorical vector of stratum labels. Its length should be the same as
+#'  the number of subjects.
+#'@param X a categorical vector of covariate levels, whose
+#'  treatment-covariate interaction is of interest.
+#'@param pi a numeric value for the target treatment proportion in each stratum.
+#'@param q a numeric value indicating the balance level of covariate-adaptive
+#'  randomizations.
+#'
+#'@return The two-sieded p-value for the test. 
+#'  Can be conservative
 old.test.multi <- function(Y, A, S, X, pi, q) {
   ## product term Wald test using Huber White variance estimators
   K = max(X)
@@ -75,6 +145,21 @@ old.test.multi <- function(Y, A, S, X, pi, q) {
   return(1- pchisq(q = wald.value, df = K) )
 }
 
+#' Modified test for no interaction for binary X 
+#'@param Y a numeric vector of observed outcomes. Its length should be the same
+#'  as the number of subjects.
+#'@param A a numeric vector of treatment assignments. Its length should be the
+#'  same as the number of subjects.
+#'@param S a categorical vector of stratum labels. Its length should be the same as
+#'  the number of subjects.
+#'@param X a categorical vector of covariate levels, whose
+#'  treatment-covariate interaction is of interest.
+#'@param pi a numeric value for the target treatment proportion in each stratum.
+#'@param q a numeric value indicating the balance level of covariate-adaptive
+#'  randomizations.
+#'
+#'@return The two-sieded p-value for the test. 
+#'  Asymptotically exact
 new.test <- function(Y, A, S, X, pi, q) {
   ## product term t-test using modified variance estimators
   n = length(Y)
@@ -85,6 +170,21 @@ new.test <- function(Y, A, S, X, pi, q) {
   return((2 * (1- pnorm(abs(t.value))) ))
 }
 
+#' Modified test for no interaction for categorical X 
+#'@param Y a numeric vector of observed outcomes. Its length should be the same
+#'  as the number of subjects.
+#'@param A a numeric vector of treatment assignments. Its length should be the
+#'  same as the number of subjects.
+#'@param S a categorical vector of stratum labels. Its length should be the same as
+#'  the number of subjects.
+#'@param X a categorical vector of covariate levels, whose
+#'  treatment-covariate interaction is of interest.
+#'@param pi a numeric value for the target treatment proportion in each stratum.
+#'@param q a numeric value indicating the balance level of covariate-adaptive
+#'  randomizations.
+#'
+#'@return The two-sieded p-value for the test. 
+#'  Asymptotically exact
 new.test.multi <- function(Y, A, S, X, pi, q) {
   ## product term Wald test using Huber White variance estimators
   K = max(X)
@@ -96,6 +196,21 @@ new.test.multi <- function(Y, A, S, X, pi, q) {
   return(1- pchisq(q = wald.value, df = K) )
 }
 
+#' Stratified-adjusted test for no interaction for binary X 
+#'@param Y a numeric vector of observed outcomes. Its length should be the same
+#'  as the number of subjects.
+#'@param A a numeric vector of treatment assignments. Its length should be the
+#'  same as the number of subjects.
+#'@param S a categorical vector of stratum labels. Its length should be the same as
+#'  the number of subjects.
+#'@param X a categorical vector of covariate levels, whose
+#'  treatment-covariate interaction is of interest.
+#'@param pi a numeric value for the target treatment proportion in each stratum.
+#'@param q a numeric value indicating the balance level of covariate-adaptive
+#'  randomizations; actually not used here.
+#'
+#'@return The two-sieded p-value for the test. 
+#'  Asymptotically exact and more powerful
 strata.test <- function(Y, A, S, X, pi, q) {
   ## strata combination test
   n = length(Y)
@@ -106,6 +221,21 @@ strata.test <- function(Y, A, S, X, pi, q) {
   return((2 * (1- pnorm(abs(t.value))) ))
 }
 
+#' Stratified-adjusted test for no interaction for categorical X 
+#'@param Y a numeric vector of observed outcomes. Its length should be the same
+#'  as the number of subjects.
+#'@param A a numeric vector of treatment assignments. Its length should be the
+#'  same as the number of subjects.
+#'@param S a categorical vector of stratum labels. Its length should be the same as
+#'  the number of subjects.
+#'@param X a categorical vector of covariate levels, whose
+#'  treatment-covariate interaction is of interest.
+#'@param pi a numeric value for the target treatment proportion in each stratum.
+#'@param q a numeric value indicating the balance level of covariate-adaptive
+#'  randomizations; actually not used here.
+#'
+#'@return The two-sieded p-value for the test. 
+#'  Asymptotically exact and more powerful
 strata.test.multi <- function(Y, A, S, X, pi, q) {
   ## product term Wald test using Huber White variance estimators
   K = max(X)
@@ -117,6 +247,21 @@ strata.test.multi <- function(Y, A, S, X, pi, q) {
   return(1- pchisq(q = wald.value, df = K) )
 }
 
+#' Simple difference-in-difference estimate for interaction effect for binary X
+#'@param Y a numeric vector of observed outcomes. Its length should be the same
+#'  as the number of subjects.
+#'@param A a numeric vector of treatment assignments. Its length should be the
+#'  same as the number of subjects.
+#'@param S a categorical vector of stratum labels. Its length should be the same as
+#'  the number of subjects; not used here.
+#'@param X a categorical vector of covariate levels, whose
+#'  treatment-covariate interaction is of interest.
+#'@param pi a numeric value for the target treatment proportion in each stratum; 
+#'  not used here.
+#'@param q a numeric value indicating the balance level of covariate-adaptive
+#'  randomizations; not used here.
+#'
+#'@return The usual point estimate for interaction effect.
 tau.t <- function(Y, A, S, X, pi, q) {
   ## calculate Y_{11} - Y_{10} - Y_{01} + Y_{00}
   indicate11 = A * ifelse(X == 1, 1, 0)
@@ -138,6 +283,21 @@ tau.t <- function(Y, A, S, X, pi, q) {
   return(difference)
 }
 
+#' Simple difference-in-difference estimate for interaction effect for categorical X
+#'@param Y a numeric vector of observed outcomes. Its length should be the same
+#'  as the number of subjects.
+#'@param A a numeric vector of treatment assignments. Its length should be the
+#'  same as the number of subjects.
+#'@param S a categorical vector of stratum labels. Its length should be the same as
+#'  the number of subjects; not used here.
+#'@param X a categorical vector of covariate levels, whose
+#'  treatment-covariate interaction is of interest.
+#'@param pi a numeric value for the target treatment proportion in each stratum; 
+#'  not used here.
+#'@param q a numeric value indicating the balance level of covariate-adaptive
+#'  randomizations; not used here.
+#'
+#'@return The usual point estimate for interaction effect.
 tau.t.multi <- function(Y, A, S, X, pi, q) {
   ## calculate Y_{1x} - Y_{10} - Y_{0x} + Y_{00}
   ## X = 0, 1, 2, ...
@@ -153,6 +313,21 @@ tau.t.multi <- function(Y, A, S, X, pi, q) {
   return(difference)
 }
 
+#' Stratified-adajusted estimate for interaction effect for binary X
+#'@param Y a numeric vector of observed outcomes. Its length should be the same
+#'  as the number of subjects.
+#'@param A a numeric vector of treatment assignments. Its length should be the
+#'  same as the number of subjects.
+#'@param S a categorical vector of stratum labels. Its length should be the same as
+#'  the number of subjects.
+#'@param X a categorical vector of covariate levels, whose
+#'  treatment-covariate interaction is of interest.
+#'@param pi a numeric value for the target treatment proportion in each stratum; 
+#'  not used here.
+#'@param q a numeric value indicating the balance level of covariate-adaptive
+#'  randomizations; not used here.
+#'
+#'@return The stratified-adjusted point estimate for interaction effect.
 tau.strata <- function(Y, A, S, X, pi, q) {
   ## strata combination estimator
   n = length(Y)
@@ -245,6 +420,21 @@ tau.strata <- function(Y, A, S, X, pi, q) {
   return(difference_strata)
 }
 
+#' Stratified-adajusted estimate for interaction effect for categorical X
+#'@param Y a numeric vector of observed outcomes. Its length should be the same
+#'  as the number of subjects.
+#'@param A a numeric vector of treatment assignments. Its length should be the
+#'  same as the number of subjects.
+#'@param S a categorical vector of stratum labels. Its length should be the same as
+#'  the number of subjects.
+#'@param X a categorical vector of covariate levels, whose
+#'  treatment-covariate interaction is of interest.
+#'@param pi a numeric value for the target treatment proportion in each stratum; 
+#'  not used here.
+#'@param q a numeric value indicating the balance level of covariate-adaptive
+#'  randomizations; not used here.
+#'
+#'@return The stratified-adjusted point estimate for interaction effect.
 tau.strata.multi <- function(Y, A, S, X, pi, q) {
   ## strata combination estimator
   est.package = base.est.multi(Y, A, S, X, pi, q)
@@ -314,6 +504,21 @@ tau.strata.multi <- function(Y, A, S, X, pi, q) {
   return(difference_strata)
 }
 
+#' Huber White variance estimator for interaction effect for binary X
+#'@param Y a numeric vector of observed outcomes. Its length should be the same
+#'  as the number of subjects.
+#'@param A a numeric vector of treatment assignments. Its length should be the
+#'  same as the number of subjects.
+#'@param S a categorical vector of stratum labels. Its length should be the same as
+#'  the number of subjects; not used here.
+#'@param X a categorical vector of covariate levels, whose
+#'  treatment-covariate interaction is of interest.
+#'@param pi a numeric value for the target treatment proportion in each stratum; 
+#'  not used here.
+#'@param q a numeric value indicating the balance level of covariate-adaptive
+#'  randomizations; not used here.
+#'
+#'@return The Huber White variance estimator for interaction effect.
 var.heter <- function(Y, A, S, X, pi, q) {
   ## calculate the Huber White variance estimators
   n = length(Y)
@@ -342,6 +547,21 @@ var.heter <- function(Y, A, S, X, pi, q) {
   return(var.est)
 }
 
+#' The inverse of Huber White variance estimator for interaction effect for categorical X
+#'@param Y a numeric vector of observed outcomes. Its length should be the same
+#'  as the number of subjects.
+#'@param A a numeric vector of treatment assignments. Its length should be the
+#'  same as the number of subjects.
+#'@param S a categorical vector of stratum labels. Its length should be the same as
+#'  the number of subjects; not used here.
+#'@param X a categorical vector of covariate levels, whose
+#'  treatment-covariate interaction is of interest.
+#'@param pi a numeric value for the target treatment proportion in each stratum; 
+#'  not used here.
+#'@param q a numeric value indicating the balance level of covariate-adaptive
+#'  randomizations; not used here.
+#'
+#'@return The inverse of Huber White variance estimator for R\hat{tau}.
 var.heter.multi.inv <- function(Y, A, S, X, pi, q) {
   ## calculate the Huber White variance estimators
   ## X = 0, 1, 2, ...
@@ -364,6 +584,20 @@ var.heter.multi.inv <- function(Y, A, S, X, pi, q) {
   diag(sigma.nk.inv, nrow = K) - sigma.nk.inv %*% t(sigma.nk.inv) / (sigma.n0.inv + sum(sigma.nk.inv))
 }
 
+#' The modified variance estimator for interaction effect for binary X
+#'@param Y a numeric vector of observed outcomes. Its length should be the same
+#'  as the number of subjects.
+#'@param A a numeric vector of treatment assignments. Its length should be the
+#'  same as the number of subjects.
+#'@param S a categorical vector of stratum labels. Its length should be the same as
+#'  the number of subjects;
+#'@param X a categorical vector of covariate levels, whose
+#'  treatment-covariate interaction is of interest.
+#'@param pi a numeric value for the target treatment proportion in each stratum.
+#'@param q a numeric value indicating the balance level of covariate-adaptive
+#'  randomizations.
+#'
+#'@return The modified variance estimator for interaction effect.
 var.modified <- function(Y, A, S, X, pi, q) {
   n = length(Y)
 
@@ -488,6 +722,20 @@ var.modified <- function(Y, A, S, X, pi, q) {
   return(var.est)
 }
 
+#' The inverse of modified variance estimator for interaction effect for categorical X
+#'@param Y a numeric vector of observed outcomes. Its length should be the same
+#'  as the number of subjects.
+#'@param A a numeric vector of treatment assignments. Its length should be the
+#'  same as the number of subjects.
+#'@param S a categorical vector of stratum labels. Its length should be the same as
+#'  the number of subjects.
+#'@param X a categorical vector of covariate levels, whose
+#'  treatment-covariate interaction is of interest.
+#'@param pi a numeric value for the target treatment proportion in each stratum.
+#'@param q a numeric value indicating the balance level of covariate-adaptive
+#'  randomizations.
+#'
+#'@return The inverse of modified variance estimator for R\hat{tau}.
 var.modified.multi.inv <- function(Y, A, S, X, pi, q) {
   ## calculate the modified variance estimators
   ## X = 0, 1, 2, ...
@@ -567,7 +815,20 @@ var.modified.multi.inv <- function(Y, A, S, X, pi, q) {
   solve(R %*%Sigma.mod %*% t(R))
 }
 
-
+#' The stratified-adjusted variance estimator for interaction effect for binary X
+#'@param Y a numeric vector of observed outcomes. Its length should be the same
+#'  as the number of subjects.
+#'@param A a numeric vector of treatment assignments. Its length should be the
+#'  same as the number of subjects.
+#'@param S a categorical vector of stratum labels. Its length should be the same as
+#'  the number of subjects;
+#'@param X a categorical vector of covariate levels, whose
+#'  treatment-covariate interaction is of interest.
+#'@param pi a numeric value for the target treatment proportion in each stratum.
+#'@param q a numeric value indicating the balance level of covariate-adaptive
+#'  randomizations.
+#'
+#'@return The stratified-adajusted variance estimator for interaction effect.
 var.strata <- function(Y, A, S, X, pi, q) {
   ## strata combination estimator
   n = length(Y)
@@ -684,6 +945,20 @@ var.strata <- function(Y, A, S, X, pi, q) {
   return(var.est)
 }
 
+#' The stratified-adjusted variance estimator for interaction effect for categorical X
+#'@param Y a numeric vector of observed outcomes. Its length should be the same
+#'  as the number of subjects.
+#'@param A a numeric vector of treatment assignments. Its length should be the
+#'  same as the number of subjects.
+#'@param S a categorical vector of stratum labels. Its length should be the same as
+#'  the number of subjects;
+#'@param X a categorical vector of covariate levels, whose
+#'  treatment-covariate interaction is of interest.
+#'@param pi a numeric value for the target treatment proportion in each stratum.
+#'@param q a numeric value indicating the balance level of covariate-adaptive
+#'  randomizations.
+#'
+#'@return The inverser of the stratified-adajusted variance estimator for R\hat{tau}.
 var.strata.multi.inv <- function(Y, A, S, X, pi, q) {
   ## calculate the modified variance estimators
   ## X = 0, 1, 2, ...
