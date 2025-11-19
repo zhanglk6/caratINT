@@ -22,7 +22,7 @@ treatment-covariate interaction is of interest.}
 \item{pi}{a numeric value for the target treatment proportion in each stratum.}
 }
 \value{
-The p-value for the test.
+The two-sieded p-value for the test.
 }
 \description{
 Testing the interaction effect based on difference in means interaction effect

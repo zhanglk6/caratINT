@@ -26,7 +26,7 @@ randomizations. Detailed information can be found in Section 2, Ma et
 al. (2022) and Zhang and Ma (2024).}
 }
 \value{
-The p-value for the test.
+The two-sieded p-value for the test.
 }
 \description{
 Testing the interaction effect based on difference in means interaction effect
