@@ -1,3 +1,17 @@
+#' The modified variance estimator for interaction effect for continuous X
+#'@param Y a numeric vector of observed outcomes. Its length should be the same
+#'  as the number of subjects.
+#'@param A a numeric vector of treatment assignments. Its length should be the
+#'  same as the number of subjects.
+#'@param S a categorical vector of stratum labels. Its length should be the same as
+#'  the number of subjects;
+#'@param X a numeric vector of covariate values, whose
+#'  treatment-covariate interaction is of interest.
+#'@param pi a numeric value for the target treatment proportion in each stratum.
+#'@param q a numeric value indicating the balance level of covariate-adaptive
+#'  randomizations.
+#'
+#'@return The modified variance estimator for interaction effect.
 var.modified <- function(Y, A, S, X, pi, q) {
   n = length(Y)
   n1 = sum(A)
@@ -21,7 +35,20 @@ var.modified <- function(Y, A, S, X, pi, q) {
   return(var.est)
 }
 
-
+#' The transformed outcomes used for interaction tests for continuous X
+#'@param Y a numeric vector of observed outcomes. Its length should be the same
+#'  as the number of subjects.
+#'@param A a numeric vector of treatment assignments. Its length should be the
+#'  same as the number of subjects.
+#'@param S a categorical vector of stratum labels. Its length should be the same as
+#'  the number of subjects;
+#'@param X a numeric vector of covariate values, whose
+#'  treatment-covariate interaction is of interest.
+#'@param pi a numeric value for the target treatment proportion in each stratum.
+#'@param q a numeric value indicating the balance level of covariate-adaptive
+#'  randomizations.
+#'
+#'@return A vector of the transformed outcomes r_i = r_i(1)A_i + r_i(0)(1-A_i).
 transform.outcome <- function(Y, A, S, X, pi, q) {
   n = length(Y)
   n1 = sum(A)
@@ -48,6 +75,15 @@ transform.outcome <- function(Y, A, S, X, pi, q) {
   return(r)
 }
 
+#' The stratified mean under treated
+#'@param r a numeric vector of transformed outcomes. Its length should be the same
+#'  as the number of subjects.
+#'@param A a numeric vector of treatment assignments. Its length should be the
+#'  same as the number of subjects.
+#'@param S a categorical vector of stratum labels. Its length should be the same as
+#'  the number of subjects.
+#'
+#'@return A vector of the stratified means of r under treated.
 mu1.cont <- function(r, A, S) {
   nStrata = max(S)
   mu1s = numeric(nStrata)
@@ -57,6 +93,15 @@ mu1.cont <- function(r, A, S) {
   return(mu1s)
 }
 
+#' The stratified mean under control
+#'@param r a numeric vector of transformed outcomes. Its length should be the same
+#'  as the number of subjects.
+#'@param A a numeric vector of treatment assignments. Its length should be the
+#'  same as the number of subjects.
+#'@param S a categorical vector of stratum labels. Its length should be the same as
+#'  the number of subjects.
+#'
+#'@return A vector of the stratified means of r under control.
 mu0.cont <- function(r, A, S) {
   nStrata = max(S)
   mu0s = numeric(nStrata)
@@ -66,6 +111,20 @@ mu0.cont <- function(r, A, S) {
   return(mu0s)
 }
 
+#' The first component in the asymptotic variance of the modified method
+#'@param r a numeric vector of transformed outcomes. Its length should be the same
+#'  as the number of subjects.
+#'@param A a numeric vector of treatment assignments. Its length should be the
+#'  same as the number of subjects.
+#'@param S a categorical vector of stratum labels. Its length should be the same as
+#'  the number of subjects.
+#'@param X a numeric vector of covariate values, whose
+#'  treatment-covariate interaction is of interest.
+#'@param pi a numeric value for the target treatment proportion in each stratum.
+#'@param q a numeric value indicating the balance level of covariate-adaptive
+#'  randomizations.
+#'
+#'@return A numeric value for the first component.
 zeta.tilde.r <- function(r, A, S, X, pi, q) {
   n = length(r)
   n1 = sum(A)
@@ -90,6 +149,20 @@ zeta.tilde.r <- function(r, A, S, X, pi, q) {
   return(summ)
 }
 
+#' The second component in the asymptotic variance of the modified method
+#'@param r a numeric vector of transformed outcomes. Its length should be the same
+#'  as the number of subjects.
+#'@param A a numeric vector of treatment assignments. Its length should be the
+#'  same as the number of subjects.
+#'@param S a categorical vector of stratum labels. Its length should be the same as
+#'  the number of subjects.
+#'@param X a numeric vector of covariate values, whose
+#'  treatment-covariate interaction is of interest.
+#'@param pi a numeric value for the target treatment proportion in each stratum.
+#'@param q a numeric value indicating the balance level of covariate-adaptive
+#'  randomizations.
+#'
+#'@return A numeric value for the second component.
 zeta.H.r <- function(r, A, S, X, pi, q) {
   n = length(r)
   n1 = sum(A)
@@ -114,6 +187,20 @@ zeta.H.r <- function(r, A, S, X, pi, q) {
   return(summ)
 }
 
+#' The third component in the asymptotic variance of the modified method
+#'@param r a numeric vector of transformed outcomes. Its length should be the same
+#'  as the number of subjects.
+#'@param A a numeric vector of treatment assignments. Its length should be the
+#'  same as the number of subjects.
+#'@param S a categorical vector of stratum labels. Its length should be the same as
+#'  the number of subjects.
+#'@param X a numeric vector of covariate values, whose
+#'  treatment-covariate interaction is of interest.
+#'@param pi a numeric value for the target treatment proportion in each stratum.
+#'@param q a numeric value indicating the balance level of covariate-adaptive
+#'  randomizations.
+#'
+#'@return A numeric value for the third component.
 zeta.A.r <- function(r, A, S, X, pi, q) {
   n = length(r)
   n1 = sum(A)
@@ -139,6 +226,24 @@ zeta.A.r <- function(r, A, S, X, pi, q) {
   return(summ)
 }
 
+#' The semiparametric efficient estimator for interaction effect for continuous X,
+#'   suppose that Y1_fit and Y0_fit are fitted conditional on X and Z
+#'@param Y a numeric vector of observed outcomes. Its length should be the same
+#'  as the number of subjects.
+#'@param A a numeric vector of treatment assignments. Its length should be the
+#'  same as the number of subjects.
+#'@param S a categorical vector of stratum labels. Its length should be the same as
+#'  the number of subjects;
+#'@param X a numeric vector of covariate values, whose
+#'  treatment-covariate interaction is of interest.
+#'@param pi a numeric value for the target treatment proportion in each stratum.
+#'
+#'@param Y1_fit a numeric vector of fitted values for Y1 conditioned on covariates,
+#'  expected to be derived by cross-fitting or using true Y1.
+#'@param Y0_fit a numeric vector of fitted values for Y0 conditioned on covariates,
+#'  expected to be derived by cross-fitting or using true Y0.
+#'
+#'@return The semiparametric efficient estimator for interaction effect.
 delta.eff <- function(Y, A, S, X, pi, Y1_fit, Y0_fit) {
   n = length(Y)
   meanX = mean(X)
@@ -174,6 +279,24 @@ delta.eff <- function(Y, A, S, X, pi, Y1_fit, Y0_fit) {
   return(Tns / var(X))
 }
 
+#' The semiparametric efficieny bound estimator for interaction effect for continuous X,
+#'   suppose that Y1_fit and Y0_fit are fitted conditional on X and Z
+#'@param Y a numeric vector of observed outcomes. Its length should be the same
+#'  as the number of subjects.
+#'@param A a numeric vector of treatment assignments. Its length should be the
+#'  same as the number of subjects.
+#'@param S a categorical vector of stratum labels. Its length should be the same as
+#'  the number of subjects;
+#'@param X a numeric vector of covariate values, whose
+#'  treatment-covariate interaction is of interest.
+#'@param pi a numeric value for the target treatment proportion in each stratum.
+#'
+#'@param Y1_fit a numeric vector of fitted values for Y1 conditioned on covariates,
+#'  expected to be derived by cross-fitting or using true Y1.
+#'@param Y0_fit a numeric vector of fitted values for Y0 conditioned on covariates,
+#'  expected to be derived by cross-fitting or using true Y0.
+#'
+#'@return The semiparametric efficiency bound estimator for interaction effect.
 var.eff <- function(Y, A, S, X, pi, Y1_fit, Y0_fit) {
   n = length(Y)
   meanX = mean(X)

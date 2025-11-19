@@ -3,7 +3,7 @@ random.schemes <- function(N, pi, S, profiles) {
   SBR_A = SBR(S, pi, bsize = 6)
   SBCD_A = SBCD(S, pi)
   PS_A = PS(profiles, rep(1/ncol(profiles), ncol(profiles)), pi, lambda = 0.75)
-  return(list(SRS_A=SRS_A, SBR_A=SBR_A, SBCD_A=SBCD_A, PS_A = PS_A))
+  return(list(SRS_A = SRS_A, SBR_A = SBR_A, SBCD_A = SBCD_A, PS_A = PS_A))
 }
 
 all_outputs <- function(pi, sample_data) {
@@ -40,6 +40,24 @@ all_outputs <- function(pi, sample_data) {
   return(outputs)
 }
 
+#' p-values for all methods (ols, HW, modifed, and efficient) produced by one copy of data
+#'   suppose that Y1_fit and Y0_fit are fitted conditional on X and Z
+#'@param Y a numeric vector of observed outcomes. Its length should be the same
+#'  as the number of subjects.
+#'@param A a numeric vector of treatment assignments. Its length should be the
+#'  same as the number of subjects.
+#'@param S a categorical vector of stratum labels. Its length should be the same as
+#'  the number of subjects;
+#'@param X a numeric vector of covariate values, whose
+#'  treatment-covariate interaction is of interest.
+#'@param pi a numeric value for the target treatment proportion in each stratum.
+#'
+#'@param Y1_fit a numeric vector of fitted values for Y1 conditioned on covariates,
+#'  expected to be derived by cross-fitting or using true Y1.
+#'@param Y0_fit a numeric vector of fitted values for Y0 conditioned on covariates,
+#'  expected to be derived by cross-fitting or using true Y0.
+#'
+#'@return a vector of p-values produced by different methods.
 output <- function(Y, A, S, X, pi, q, Y1_fit, Y0_fit) {
   c(
     ols.test.cont(Y, A, X),
@@ -49,21 +67,12 @@ output <- function(Y, A, S, X, pi, q, Y1_fit, Y0_fit) {
   )
 }
 
-#### cross-fitting
-Ya.fit <- function(Y, A, S, X, Z) {
-    cross.fit_strata(Y, A, S, X, Z, M=5)
-}
-
-
-I.know.fit <- function(Y, A, X, Z) {
-  Y1_fit = 5 + exp((0.5 + 0)*X) + 2*Z + 6 * Z *X * A
-  Y0_fit = 4 + exp((0.5 + 0)*X) + 2*Z 
-  Y_fit = A * Y1_fit + (1-A) * Y0_fit
-  res = Y - Y_fit
-  return(data.frame(Y_fit = Y_fit,res = res, Y1_fit = Y1_fit, Y0_fit = Y0_fit ))
-  
-}
-
+#' Generate fold indexes of size n used for cross-fitting;
+#'   first M-1 folds are of equal size
+#'@param n an Integer for sample size
+#'@param M an Integer for number of folds for M-fold cross-fitting 
+#'
+#'@return a vector of p-values produced by different methods.
 create.fold <- function(n, M = 2) {
   n_fold = numeric(M)
   fold_seq = c()
@@ -75,74 +84,4 @@ create.fold <- function(n, M = 2) {
   fold_seq = c(fold_seq, rep(M, n_fold[M]))
   fold = sample(fold_seq, n)
   return(fold)
-}
-
-
-cross.fit <- function(Y, A, X, Z, M=2) {
-  n = length(Y)
-  fold = create.fold(n, M)
-  
-  total_data = data.frame(Y = Y, A = A, X = X, Z = Z)
-  
-  Y1_fit = numeric(n)
-  Y0_fit = numeric(n)
-  Y_fit = numeric(n)
-  res = numeric(n)
-  
-  for (m in 1:M) {
-    index_in_fold = which(fold == m)
-    index_out_fold = which(fold != m)
-    train_data = total_data[index_out_fold,]
-    train_data_1 = train_data %>% subset(A==1)
-    train_data_0 = train_data %>% subset(A==0)
-    
-    bws1 = c(0.1256611,  0.1750254)
-    bws0 = c(0.3156482, 0.09994133)
-    
-    kernel_model_1 = npregbw(Y ~ X + Z, bandwidth.compute = F, 
-                             bws = bws1, data = train_data_1, regtype = "ll")
-    kernel_model_0 = npregbw(Y ~ X + Z, bandwidth.compute = F, 
-                             bws = bws0, data = train_data_0, regtype = "ll")
-    Y1_fit[index_in_fold] = npreg(kernel_model_1, exdat = cbind(X, Z)[index_in_fold,])$mean
-    Y0_fit[index_in_fold] = npreg(kernel_model_0, exdat = cbind(X, Z)[index_in_fold,])$mean
-    Y_fit[index_in_fold] = A[index_in_fold] * Y1_fit[index_in_fold] + (1-A)[index_in_fold] * Y0_fit[index_in_fold]
-    res[index_in_fold] = Y[index_in_fold] - Y_fit[index_in_fold]
-  }
-  return(data.frame(Y_fit = Y_fit,res = res, Y1_fit = Y1_fit, Y0_fit = Y0_fit ))
-}
-
-cross.fit_strata <- function(Y, A, S, X, Z, M=2) {
-  n = length(Y)
-  nStrata = max(S)
-  fold = create.fold(n, M)
-  
-  total_data = data.frame(Y = Y, A = A, S = S, X = X, Z = Z)
-  
-  Y1_fit = numeric(n)
-  Y0_fit = numeric(n)
-  Y_fit = numeric(n)
-  res = numeric(n)
-  
-  for (m in 1:M) {
-    for (i in 1:nStrata) {
-    index_in_fold = which(fold == m & S == i)
-    index_out_fold = which(fold != m & S == i)
-    train_data = total_data[index_out_fold,]
-    train_data_1 = train_data %>% subset(A==1)
-    train_data_0 = train_data %>% subset(A==0)
-    
-    bws1 = c(0.1256611,  0.1750254)
-    bws0 = c(0.3156482, 0.09994133)
-    
-    kernel_model_1 = npregbw(Y ~ X + Z, bandwidth.compute = F, 
-                             bws = bws1, data = train_data_1, regtype = "ll")
-    kernel_model_0 = npregbw(Y ~ X + Z, bandwidth.compute = F, 
-                             bws = bws0, data = train_data_0, regtype = "ll")
-    Y1_fit[index_in_fold] = npreg(kernel_model_1, exdat = cbind(X, Z)[index_in_fold,])$mean
-    Y0_fit[index_in_fold] = npreg(kernel_model_0, exdat = cbind(X, Z)[index_in_fold,])$mean
-    Y_fit[index_in_fold] = A[index_in_fold] * Y1_fit[index_in_fold] + (1-A)[index_in_fold] * Y0_fit[index_in_fold]
-    res[index_in_fold] = Y[index_in_fold] - Y_fit[index_in_fold]
-    }
-  }
-  return(data.frame(Y_fit = Y_fit,res = res, Y1_fit = Y1_fit, Y0_fit = Y0_fit ))
 }
